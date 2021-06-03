@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static org.lwjgl.vulkan.VK10.VK_API_VERSION_1_0;
 import static org.lwjgl.vulkan.VK10.VK_MAKE_VERSION;
 import static org.lwjgl.vulkan.VK11.VK_API_VERSION_1_1;
 
@@ -35,7 +36,9 @@ public class AppInfoProps
             appName = props.getOrDefault("app.name","Application").toString();
             engineName = props.getOrDefault("engine.name","NoEngine").toString();
 
-
+            int ver = Integer.parseInt(props.getOrDefault("vk.api",11).toString());
+            if(ver==10) vkVersion = VK_API_VERSION_1_0;
+            else if (ver==11) vkVersion = VK_API_VERSION_1_1;
         }catch (IOException ioe){
             LOGGER.debug("Could not read [" + FILENAME + "] properties file",ioe);
         }
@@ -52,6 +55,19 @@ public class AppInfoProps
     public int getEngineVersion() {
         return engineVersion;
     }
+
+    public int getVkVersion() {
+        return vkVersion;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getEngineName() {
+        return engineName;
+    }
+
     private static Properties props;
     private static final Logger LOGGER = LogManager.getLogger(AppInfoProps.class);
     private static final String FILENAME = "appinfo.properties";
