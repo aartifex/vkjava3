@@ -1,6 +1,8 @@
 package org.artifex;
 
+import org.artifex.util.VkExtensions;
 import org.artifex.vulkan.Instance;
+import org.lwjgl.vulkan.EXTDebugUtils;
 
 public class VkMain
 {
@@ -12,7 +14,7 @@ public class VkMain
 
 
     public VkMain(){
-        new Instance(true);
-
+        VkExtensions.addInstanceExtension(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        new Program(null);
     }
 }

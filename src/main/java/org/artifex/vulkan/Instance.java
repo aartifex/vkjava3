@@ -28,6 +28,7 @@ public class Instance
                     .apiVersion(appInfoProps.getEngineVersion());
 
             VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.callocStack(stack)
+                                                                          .sType(VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
                     .pApplicationInfo(applicationInfo);
             VkDebugUtilsMessengerCreateInfoEXT messengerCreateInfoEXT =  DebugUtil.getDebugUtilsInfo(DebugUtil.defaultMessenger);
 
