@@ -3,7 +3,6 @@ package org.artifex.util;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkLayerProperties;
-import util.Pointers;
 
 import java.nio.IntBuffer;
 import java.util.List;

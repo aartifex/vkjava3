@@ -1,5 +1,7 @@
 package org.artifex;
 
+import org.artifex.vulkan.Instance;
+
 public class VkMain
 {
 
@@ -9,4 +11,8 @@ public class VkMain
     }
 
 
+    public VkMain(){
+        new Instance(true);
+
+    }
 }
