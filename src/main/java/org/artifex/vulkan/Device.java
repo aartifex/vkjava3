@@ -4,6 +4,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.artifex.util.Pointers;
 import org.artifex.util.VkExtensions;
+import org.artifex.util.VkValidation;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -45,7 +46,8 @@ public class Device
                     .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
                     .ppEnabledExtensionNames(VkExtensions.getDeviceExt())
                     .pEnabledFeatures(features)
-                    .pQueueCreateInfos(queueCreateInfos);
+                    .pQueueCreateInfos(queueCreateInfos)
+                    .ppEnabledLayerNames(VkValidation.ppValidationLayers(stack));
 
 
             vkCheck(vkCreateDevice(physicalDevice.getDevice(),createInfo,null,pDevice),

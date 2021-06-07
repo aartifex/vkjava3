@@ -1,20 +1,20 @@
 #version 450 core
 
-layout (local_size_x=1) in;
+layout (local_size_x=256) in;
 
 layout(set=0,binding=0) buffer  inDat{
     int dat[];
 } inInt;
 
 layout(set=0,binding=1) buffer outDat{
-    int dat[];
+    int dat[ ];
 }outInt;
 
 void main(){
-
-    for(int i=0;i<100;i++){
-        outInt.dat[i]=inInt.dat[i]+5;
-        inInt.dat[i]= 123;
+    uint glID = gl_GlobalInvocationID.x;
+    if(glID < 64){
+        outInt.dat[glID] = inInt.dat[glID]+100;
+        inInt.dat[glID]=outInt.dat[glID]+100;
     }
 
 }

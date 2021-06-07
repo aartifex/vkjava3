@@ -16,7 +16,7 @@ public class VkMain
 
     public VkMain(){
         VkExtensions.addInstanceExtension(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-        VkExtensions.addDeviceExtension(KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+//        VkExtensions.addDeviceExtension(KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         new Program(null);
     }
 }

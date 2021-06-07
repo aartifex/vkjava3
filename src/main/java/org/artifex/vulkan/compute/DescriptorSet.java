@@ -69,9 +69,11 @@ public class DescriptorSet
                         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
                         ,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
                 System.out.println("\t\t"+buffer.getBuffer());
+                long offset = (i[0]==0) ? 0 : buffers.get(i[0]-1).getAllocationSize();
                 b.buffer(buffer.getBuffer())
-                        .offset(0)
-                        .range(bindings.getByteSizes().get(i[0]++));
+                        .offset(offset)
+                        .range(bindings.getByteSizes().get(i[0]));
+                i[0]++;
                 buffers.add(buffer);
             });
             VkDescriptorSetAllocateInfo.Buffer allocInfos = VkDescriptorSetAllocateInfo.callocStack(bindings.getSize(),stack);

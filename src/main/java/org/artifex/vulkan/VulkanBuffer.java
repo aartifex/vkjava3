@@ -46,7 +46,7 @@ public class VulkanBuffer
             vkCheck(vkAllocateMemory(device.getDevice(), memAlloc, null, lp), "Failed to allocate memory");
             allocationSize = memAlloc.allocationSize();
             memory = lp.get(0);
-            pMemory= PointerBuffer.allocateDirect(1);
+            pMemory= MemoryUtil.memAllocPointer(1);
 
             vkCheck(vkBindBufferMemory(device.getDevice(), buffer, memory, 0), "Failed to bind buffer memory");
         }
