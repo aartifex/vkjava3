@@ -68,11 +68,12 @@ public class DescriptorSet
                 VulkanBuffer buffer = new VulkanBuffer(device,bindings.getByteSizes().get(i[0]),
                         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
                         ,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-                System.out.println("\t\t"+buffer.getBuffer());
                 long offset = (i[0]==0) ? 0 : buffers.get(i[0]-1).getAllocationSize();
+
+                System.out.println("\t\t"+buffer.getBuffer() + " size " + buffer.getAllocationSize());
                 b.buffer(buffer.getBuffer())
-                        .offset(offset)
-                        .range(bindings.getByteSizes().get(i[0]));
+                        .offset(0)
+                        .range(buffer.getAllocationSize());
                 i[0]++;
                 buffers.add(buffer);
             });
@@ -112,6 +113,10 @@ public class DescriptorSet
         return bufferInfos;
     }
 
+    public VkDescriptorBufferInfo.Buffer getBufferInfo(int i) {
+        return VkDescriptorBufferInfo.calloc(1).put(0,
+                bufferInfos.get(i));
+    }
     public Device getDevice() {
         return device;
     }

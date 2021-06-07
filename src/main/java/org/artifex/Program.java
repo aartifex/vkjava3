@@ -1,5 +1,6 @@
 package org.artifex;
 
+import org.artifex.math.Vector3fBuffer;
 import org.artifex.props.AppProperties;
 import org.artifex.util.Pointers;
 import org.artifex.util.SPIRV;
@@ -8,13 +9,10 @@ import org.artifex.vulkan.compute.Compute;
 import org.artifex.vulkan.compute.DescriptorBindings;
 import org.artifex.vulkan.compute.DescriptorCopyWrite;
 import org.artifex.vulkan.compute.DescriptorSet;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryStack;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.VkBufferMemoryBarrier;
-import org.lwjgl.vulkan.VkCommandBuffer;
-import org.lwjgl.vulkan.VkSubmitInfo;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.vulkan.VK10.*;
@@ -31,18 +29,18 @@ public class Program
         physicalDevice = PhysicalDevice.createPhysicalDevice(instance,null);
         device = new Device(physicalDevice);
 
-        DescriptorBindings bindings = new DescriptorBindings(2,VK_SHADER_STAGE_COMPUTE_BIT)
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,0,1,Integer.BYTES*64)
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,1,1,Integer.BYTES*64);
+        DescriptorBindings bindings = new DescriptorBindings(1,VK_SHADER_STAGE_COMPUTE_BIT)
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,0,1,Vector3fBuffer.SIZEOF*256);
+//                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,1,1,Integer.BYTES*256);
 
         computeQueue = new Queue.ComputeQueue(device,0);
 
         this.commandPool = new CommandPool(device,computeQueue.getQueueFamilyIndex());
         this.commandBuffer = new CommandBuffer(commandPool,true,true);
         DescriptorSet set = new DescriptorSet(device,bindings,1);
-         copyWrite = new DescriptorCopyWrite(set,2,0)
-                .addWrite(0,set.getHandles().get(0),set.getBufferInfos())
-                 .addWrite(1,set.getHandles().get(0),set.getBufferInfos());
+         copyWrite = new DescriptorCopyWrite(set,1,0)
+                .addWrite(0,set.getHandles().get(0),set.getBufferInfo(0));
+//                 .addWrite(1,set.getHandles().get(0),set.getBufferInfo(1));
 //                .addCopy(0,0,set.getHandles().get(0),1,0);
         Compute compute = new Compute(device,set,
                 new ShaderModule(VK_SHADER_STAGE_COMPUTE_BIT,device,SPIRV.compileShaderFile("compute.comp", SPIRV.ShaderType.COMPUTE_SHADER)));
@@ -54,12 +52,17 @@ public class Program
 
 
         long map1 = set.getBuffer(0).map();
-        IntBuffer indat = MemoryUtil.memIntBuffer(map1,100);
+//        long map2 = set.getBuffer(1).map();
+        Vector3fBuffer indat = Vector3fBuffer.memVec3fBuffer(map1,256);
+//        FloatBuffer indat2 = MemoryUtil.memFloatBuffer(map2,256);
         for (int i = 0; i < indat.capacity(); i++) {
-            indat.put(i,i);
+            indat.setX(i,100);
+//            indat2.put(i,10);
         }
-        copyWrite.updateDescriptorSets();
+//        set.getBuffer(1).unmap();
         set.getBuffer(0).unmap();
+
+        copyWrite.updateDescriptorSets();
 
 
         record(set,bindings,compute);
@@ -77,16 +80,20 @@ public class Program
 
         computeQueue.waitIdle();
         device.waitIdle();
-        copyWrite.updateDescriptorSets();
-        PointerBuffer pLoad = MemoryUtil.memAllocPointer(1);
+        fence.fenceWait();
+//        copyWrite.updateDescriptorSets();
 //        vkMapMemory(device.getDevice(),set.getBuffer(1).getMemory(),0,Integer.BYTES*64,0, pLoad);
+        Vector3fBuffer ibuff = Vector3fBuffer.memVec3fBuffer(set.getBuffer(0).map(),256);
 
-        IntBuffer output =MemoryUtil.memIntBuffer(set.getBuffer(0).map(),128);// MemoryUtil.memIntBuffer(set.getBuffer(1).map(),100);
-
-        for (int i = 0; i < output.capacity(); i++) {
-            System.out.println(output.get(i));
+//        FloatBuffer output =MemoryUtil.memFloatBuffer(set.getBuffer(1).map(),256);// MemoryUtil.memIntBuffer(set.getBuffer(1).map(),100);
+        Vector3f[] vecs = ibuff.getVectors();
+        FloatBuffer sasdf = ibuff.getBuffer();
+        for (int i = 0; i < ibuff.capacity(); i++) {
+            System.out.println(vecs[i]);
+//            System.out.println(output.get(i));
         }
-        set.getBuffer(1).unmap();
+        set.getBuffer(0).unmap();
+//        set.getBuffer(1).unmap();
 
 //        while(w.alive()){
 //            w.pollEvents();
@@ -105,7 +112,7 @@ public class Program
                 0,Pointers.listToBuffer(set.getHandles()),null
                 );
 
-        vkCmdDispatch(commandBuffer.getCommandBuffer(),100/256+1,1,1);
+        vkCmdDispatch(commandBuffer.getCommandBuffer(),1,1,1);
             commandBuffer.endRecording();
 
 
