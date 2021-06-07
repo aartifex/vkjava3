@@ -92,6 +92,11 @@ public class VulkanBuffer
     public long getAllocationSize() {
         return allocationSize;
     }
+
+    public long getMemory() {
+        return memory;
+    }
+
     private final long buffer;
     private final long allocationSize;
     private final long requestedSize;

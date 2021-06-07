@@ -3,6 +3,7 @@ package org.artifex.vulkan;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.artifex.util.Pointers;
+import org.artifex.util.VkExtensions;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -42,7 +43,7 @@ public class Device
 
             VkDeviceCreateInfo createInfo = VkDeviceCreateInfo.callocStack(stack)
                     .sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO)
-                    .ppEnabledExtensionNames(ppDeviceExtensions)
+                    .ppEnabledExtensionNames(VkExtensions.getDeviceExt())
                     .pEnabledFeatures(features)
                     .pQueueCreateInfos(queueCreateInfos);
 

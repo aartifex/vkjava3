@@ -14,27 +14,12 @@ public class Compute
 {
 
 
-    public Compute(Device device,ShaderModule shaderModule){
+    public Compute(Device device,DescriptorSet set,ShaderModule shaderModule){
         this.computeShader=shaderModule;
         this.device=device;
 
         try(MemoryStack stack =MemoryStack.stackPush()){
 
-            VkDescriptorSetLayoutBinding.Buffer binding = VkDescriptorSetLayoutBinding.callocStack(1,stack)
-                    .binding(0)
-                    .descriptorCount(1)
-                    .descriptorType(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                    .stageFlags(VK_SHADER_STAGE_COMPUTE_BIT);
-
-            VkDescriptorSetLayoutCreateInfo createInfo = VkDescriptorSetLayoutCreateInfo.callocStack(stack)
-                    .pBindings(binding)
-                    .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO)
-                    .flags(0);
-
-
-            LongBuffer pSetLayout = stack.mallocLong(1);
-            DebugUtil.vkCheck(vkCreateDescriptorSetLayout( device.getDevice(),createInfo,null,pSetLayout),
-                    "Could not create set layout!");
 
             VkPipelineShaderStageCreateInfo stageCreateInfo = VkPipelineShaderStageCreateInfo.callocStack(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
@@ -45,7 +30,7 @@ public class Compute
 
             VkPipelineLayoutCreateInfo layoutCreateInfo = VkPipelineLayoutCreateInfo.callocStack(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                    .pSetLayouts(pSetLayout)
+                    .pSetLayouts(stack.longs(set.getDescriptorLayout()))
                     .flags(0);
 
             LongBuffer pLayout = stack.mallocLong(1);
@@ -54,6 +39,7 @@ public class Compute
                     "Could not create pipeline layout"
             );
 
+            this.pipelineLayout=pLayout.get(0);
 
 
             VkComputePipelineCreateInfo.Buffer pipelineCreateInfo = VkComputePipelineCreateInfo.callocStack(1,stack);
@@ -71,10 +57,20 @@ public class Compute
             );
 
             computePipeline=pCompute.get(0);
+
         }
     }
 
+    public long getComputePipeline() {
+        return computePipeline;
+    }
+
+    public long getPipelineLayout() {
+        return pipelineLayout;
+    }
+
     private long computePipeline;
+    private long pipelineLayout;
     private ShaderModule computeShader;
     private Device device;
 }

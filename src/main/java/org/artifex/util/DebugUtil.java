@@ -38,7 +38,7 @@ public class DebugUtil
                     logLevel = Level.ERROR;
                 }
 
-                LOGGER.log(logLevel, "VkDebugUtilsCallback, " +  callbackData.pMessageString());
+                if(severity> VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)LOGGER.log(logLevel, "VkDebugUtilsCallback, " +  callbackData.pMessageString());
                 return VK_FALSE;
             }
 

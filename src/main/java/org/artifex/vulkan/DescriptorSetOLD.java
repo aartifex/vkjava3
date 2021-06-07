@@ -8,10 +8,10 @@ import java.nio.LongBuffer;
 
 import static org.lwjgl.vulkan.VK10.*;
 
-public class DescriptorSet
+public class DescriptorSetOLD
 {
 
-    public DescriptorSet(Device device){
+    public DescriptorSetOLD(Device device){
 
         try(MemoryStack stack = MemoryStack.stackPush()){
 
