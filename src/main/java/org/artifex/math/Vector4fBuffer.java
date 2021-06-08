@@ -6,7 +6,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 
-public class Vector4fBuffer
+public class Vector4fBuffer extends MathBuffer
 {
 
     private Vector4fBuffer(long address,int capacity){
@@ -106,7 +106,7 @@ public class Vector4fBuffer
     }
 
     public void free(){
-        buffer.clear();
+        MemoryUtil.memFree(buffer);
     }
 
     public int capacity(){
@@ -115,6 +115,11 @@ public class Vector4fBuffer
 
     public FloatBuffer getBuffer() {
         return buffer;
+    }
+
+    @Override
+    public long sizeof() {
+        return Float.BYTES*buffer.capacity();
     }
 
     private final FloatBuffer buffer;

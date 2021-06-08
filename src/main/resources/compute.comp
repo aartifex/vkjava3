@@ -3,25 +3,24 @@
 layout (local_size_x=1) in;
 
 
-layout(std140,set=0,binding=0) buffer  inDat{
-    vec4 data[];
+layout(set=0,binding=0) buffer  inDat{
+    mat3 data[];
 } inInt;
 
-layout(set=0,binding=1)buffer readonly Time {
+layout(set=0,binding=1)buffer  Time {
     float val[];
 }time;
-//layout(set=0,binding=1) buffer outDat{
-//    float dat[];
-//}outInt;
+
 
 void main(){
     uint glID = gl_GlobalInvocationID.x;
         if(glID <= 1){
-            vec3 tmp = vec3(2,0,2);
+
 
         for(int i=1;i<100;i++){
-            vec3 res = cross(inInt.data[i].xyz,tmp);
-           inInt.data[i]= vec4(res,1);
+           inInt.data[i] = mat3(1,1,1,
+                                2,2,2,
+                                3,3,3);
         }
 
 

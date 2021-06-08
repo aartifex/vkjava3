@@ -1,12 +1,13 @@
 package org.artifex;
 
+import org.artifex.math.Matrix3fBuffer;
 import org.artifex.math.Vector4fBuffer;
 import org.artifex.props.AppProperties;
-import org.artifex.util.Pointers;
 import org.artifex.util.SPIRV;
 import org.artifex.vulkan.*;
 import org.artifex.vulkan.compute.Compute;
 import org.artifex.vulkan.descriptors.*;
+import org.joml.Matrix3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -31,7 +32,7 @@ public class Program
         device = new Device(physicalDevice);
 
         GLSLayout layout = new GLSLayout(1,0,0);
-        layout.setDescriptor(0,Vector4fBuffer.SIZEOF*128,128);
+        layout.setDescriptor(0,Matrix3fBuffer.SIZEOF*128,128);
         GLSLayout layout2 = new GLSLayout(1,0,1);
         layout2.setDescriptor(0,Float.BYTES*128,128);
 
@@ -66,9 +67,9 @@ public class Program
 
 
 
-        Vector4fBuffer indat = set.loadAsVector4f(0,0);
+        Matrix3fBuffer indat = set.mapAsMatrix3f(0,0);
         for (int i = 0; i < indat.capacity(); i++) {
-            indat.putX(i,100);
+            indat.putm00(i,100);
         }
         set.unmapBuffer(0,0);
 
@@ -90,14 +91,16 @@ public class Program
         computeQueue.waitIdle();
         device.waitIdle();
         fence.fenceWait();
-        Vector4fBuffer ibuff = set.loadAsVector4f(0,0);
+        Matrix3fBuffer ibuff = set.mapAsMatrix3f(0,0);
 
-        Vector4f[] vecs = ibuff.toVector4f();
-        FloatBuffer sasdf = ibuff.getBuffer();
+        Matrix3f[] vecs = ibuff.getMatrices();
         for (int i = 0; i < ibuff.capacity(); i++) {
             System.out.println(vecs[i]);
         }
         set.unmapBuffer(0,0);
+
+        ibuff.free();
+        indat.free();
 
     }
 

@@ -1,5 +1,6 @@
 package org.artifex.vulkan.descriptors;
 
+import org.artifex.math.Matrix3fBuffer;
 import org.artifex.math.Vector4fBuffer;
 import org.artifex.util.DebugUtil;
 import org.artifex.vulkan.Device;
@@ -107,7 +108,7 @@ public class DescriptorSet
         }
     }
 
-    public Vector4fBuffer loadAsVector4f(int binding,int descriptorNum){
+    public Vector4fBuffer mapAsVector4f(int binding, int descriptorNum){
         VulkanBuffer buffer =bindings.getBinding(binding).getBuffer();
         Objects.requireNonNull(buffer,"Buffer was null. Descriptor has not properly been allocated.");
 
@@ -119,6 +120,17 @@ public class DescriptorSet
         return v4b;
 
     }
+    public Matrix3fBuffer mapAsMatrix3f(int binding, int descriptorNum){
+        VulkanBuffer buffer =bindings.getBinding(binding).getBuffer();
+        Objects.requireNonNull(buffer,"Buffer was null. Descriptor has not properly been allocated.");
+
+        GLSLayout layout = bindings.getBinding(binding).getGlsLayout();
+
+        Matrix3fBuffer v4b = Matrix3fBuffer.memVector4fBuffer(buffer.map()+layout.getDescriptor(descriptorNum).getOffset(),
+                layout.getDescriptor(descriptorNum).getLength());
+        return v4b;
+    }
+
     public void unmapBuffer(int binding, int descriptorNum){
         VulkanBuffer buffer =bindings.getBinding(binding).getBuffer();
         Objects.requireNonNull(buffer,"Buffer was null. Descriptor has not properly been allocated.");
