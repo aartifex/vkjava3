@@ -126,9 +126,9 @@ public class DescriptorSet
 
         GLSLayout layout = bindings.getBinding(binding).getGlsLayout();
 
-        Matrix3fBuffer v4b = Matrix3fBuffer.memVector4fBuffer(buffer.map()+layout.getDescriptor(descriptorNum).getOffset(),
+        Matrix3fBuffer m3b = Matrix3fBuffer.memVector4fBuffer(buffer.map()+layout.getDescriptor(descriptorNum).getOffset(),
                 layout.getDescriptor(descriptorNum).getLength());
-        return v4b;
+        return m3b;
     }
 
     public void unmapBuffer(int binding, int descriptorNum){

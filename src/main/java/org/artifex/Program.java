@@ -32,7 +32,8 @@ public class Program
         device = new Device(physicalDevice);
 
         GLSLayout layout = new GLSLayout(1,0,0);
-        layout.setDescriptor(0,Matrix3fBuffer.SIZEOF*128,128);
+        layout.setDescriptor(0,Matrix3fBuffer.SIZEOF*1000000,1000000);
+
         GLSLayout layout2 = new GLSLayout(1,0,1);
         layout2.setDescriptor(0,Float.BYTES*128,128);
 
@@ -41,8 +42,6 @@ public class Program
         DescriptorBinding descriptorBinding1 = new DescriptorBinding(layout2,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                 VK_SHADER_STAGE_COMPUTE_BIT);
 
-        System.err.println(" AHAHAHA   " + layout.totalByteSize());
-        System.err.println(" AHAHAHA   " + layout2.totalByteSize());
         DescriptorBindings bindings = new DescriptorBindings(new ArrayList<>(List.of(descriptorBinding,descriptorBinding1)),
                 0);
         DescriptorSet set = new DescriptorSet(device,bindings,0);
@@ -69,7 +68,9 @@ public class Program
 
         Matrix3fBuffer indat = set.mapAsMatrix3f(0,0);
         for (int i = 0; i < indat.capacity(); i++) {
-            indat.putm00(i,100);
+            indat.put(i, new Matrix3f(1,1,1,
+                    1,1,1,
+                    1,1,1));
         }
         set.unmapBuffer(0,0);
 
@@ -83,24 +84,30 @@ public class Program
 
 
 
-
         computeQueue.submit(MemoryUtil.memAllocPointer(1).put(0,commandBuffer.getCommandBuffer().address()),
                 null, shstg,
                 null,fence);
+        long start = System.nanoTime();
 
         computeQueue.waitIdle();
+        long fin = System.nanoTime();
+
         device.waitIdle();
         fence.fenceWait();
+
+
+
+        System.out.println("Done in " + (fin-start)/1E6 + " millis");
         Matrix3fBuffer ibuff = set.mapAsMatrix3f(0,0);
 
         Matrix3f[] vecs = ibuff.getMatrices();
-        for (int i = 0; i < ibuff.capacity(); i++) {
+        for (int i = 0; i < 3; i++) {
             System.out.println(vecs[i]);
         }
         set.unmapBuffer(0,0);
 
-        ibuff.free();
-        indat.free();
+//        ibuff.free();
+//        indat.free();
 
     }
 
@@ -115,7 +122,7 @@ public class Program
                 0,stack.longs(set.getSetHandle()),null
                 );
 
-        vkCmdDispatch(commandBuffer.getCommandBuffer(),1,1,1);
+        vkCmdDispatch(commandBuffer.getCommandBuffer(),1,2,1);
             commandBuffer.endRecording();
 
         }
