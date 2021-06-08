@@ -1,21 +1,20 @@
 package org.artifex;
 
-import org.artifex.math.Vector3fBuffer;
 import org.artifex.math.Vector4fBuffer;
 import org.artifex.props.AppProperties;
 import org.artifex.util.Pointers;
 import org.artifex.util.SPIRV;
 import org.artifex.vulkan.*;
 import org.artifex.vulkan.compute.Compute;
-import org.artifex.vulkan.compute.DescriptorBindings;
-import org.artifex.vulkan.compute.DescriptorCopyWrite;
-import org.artifex.vulkan.compute.DescriptorSet;
-import org.joml.Vector3f;
+import org.artifex.vulkan.descriptors.*;
 import org.joml.Vector4f;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -31,19 +30,34 @@ public class Program
         physicalDevice = PhysicalDevice.createPhysicalDevice(instance,null);
         device = new Device(physicalDevice);
 
-        DescriptorBindings bindings = new DescriptorBindings(1,VK_SHADER_STAGE_COMPUTE_BIT)
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,0,1, Vector4fBuffer.SIZEOF*256);
-//                .add(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,1,1,Integer.BYTES*256);
+        GLSLayout layout = new GLSLayout(1,0,0);
+        layout.setDescriptor(0,Vector4fBuffer.SIZEOF*128,128);
+        GLSLayout layout2 = new GLSLayout(1,0,1);
+        layout2.setDescriptor(0,Float.BYTES*128,128);
+
+        DescriptorBinding descriptorBinding = new DescriptorBinding(layout,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                VK_SHADER_STAGE_COMPUTE_BIT);
+        DescriptorBinding descriptorBinding1 = new DescriptorBinding(layout2,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                VK_SHADER_STAGE_COMPUTE_BIT);
+
+        System.err.println(" AHAHAHA   " + layout.totalByteSize());
+        System.err.println(" AHAHAHA   " + layout2.totalByteSize());
+        DescriptorBindings bindings = new DescriptorBindings(new ArrayList<>(List.of(descriptorBinding,descriptorBinding1)),
+                0);
+        DescriptorSet set = new DescriptorSet(device,bindings,0);
+        set.allocate();
+
+        copyWrite = new DescriptorCopyWrite(2,0);
+        copyWrite.addWrite(0,set);
+        copyWrite.addWrite(1,set);
+        copyWrite.updateDescriptorSets(device);
 
         computeQueue = new Queue.ComputeQueue(device,0);
+        commandPool = new CommandPool(device,computeQueue.getQueueFamilyIndex());
+        commandBuffer = new CommandBuffer(commandPool,true,true);
 
-        this.commandPool = new CommandPool(device,computeQueue.getQueueFamilyIndex());
-        this.commandBuffer = new CommandBuffer(commandPool,true,true);
-        DescriptorSet set = new DescriptorSet(device,bindings,1);
-         copyWrite = new DescriptorCopyWrite(set,1,0)
-                .addWrite(0,set.getHandles().get(0),set.getBufferInfo(0));
-//                 .addWrite(1,set.getHandles().get(0),set.getBufferInfo(1));
-//                .addCopy(0,0,set.getHandles().get(0),1,0);
+        //submit
+
         Compute compute = new Compute(device,set,
                 new ShaderModule(VK_SHADER_STAGE_COMPUTE_BIT,device,SPIRV.compileShaderFile("compute.comp", SPIRV.ShaderType.COMPUTE_SHADER)));
         fence = new Fence(device,false);
@@ -52,14 +66,13 @@ public class Program
 
 
 
-        long map1 = set.getBuffer(0).map();
-        Vector4fBuffer indat = Vector4fBuffer.memVector4fBuffer(map1,256);
+        Vector4fBuffer indat = set.loadAsVector4f(0,0);
         for (int i = 0; i < indat.capacity(); i++) {
             indat.putX(i,100);
         }
-        set.getBuffer(0).unmap();
+        set.unmapBuffer(0,0);
 
-        copyWrite.updateDescriptorSets();
+//        copyWrite.updateDescriptorSets(device);
 
 
         record(set,bindings,compute);
@@ -77,31 +90,32 @@ public class Program
         computeQueue.waitIdle();
         device.waitIdle();
         fence.fenceWait();
-        Vector4fBuffer ibuff = Vector4fBuffer.memVector4fBuffer(set.getBuffer(0).map(),256);
+        Vector4fBuffer ibuff = set.loadAsVector4f(0,0);
 
         Vector4f[] vecs = ibuff.toVector4f();
         FloatBuffer sasdf = ibuff.getBuffer();
         for (int i = 0; i < ibuff.capacity(); i++) {
             System.out.println(vecs[i]);
         }
-        set.getBuffer(0).unmap();
+        set.unmapBuffer(0,0);
 
     }
 
-    public void record(DescriptorSet set, DescriptorBindings bindings,Compute compute){
+    public void record(DescriptorSet set, DescriptorBindings bindings, Compute compute){
 
+        try(MemoryStack stack= MemoryStack.stackPush()){
         commandBuffer.beginRecording();
         vkCmdBindPipeline(commandBuffer.getCommandBuffer(),VK_PIPELINE_BIND_POINT_COMPUTE,
                 compute.getComputePipeline());
 
         vkCmdBindDescriptorSets(commandBuffer.getCommandBuffer(),VK_PIPELINE_BIND_POINT_COMPUTE,compute.getPipelineLayout(),
-                0,Pointers.listToBuffer(set.getHandles()),null
+                0,stack.longs(set.getSetHandle()),null
                 );
 
         vkCmdDispatch(commandBuffer.getCommandBuffer(),1,1,1);
             commandBuffer.endRecording();
 
-
+        }
 
     }
 

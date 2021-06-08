@@ -2,10 +2,14 @@
 
 layout (local_size_x=1) in;
 
+
 layout(std140,set=0,binding=0) buffer  inDat{
     vec4 data[];
 } inInt;
 
+layout(set=0,binding=1)buffer readonly Time {
+    float val[];
+}time;
 //layout(set=0,binding=1) buffer outDat{
 //    float dat[];
 //}outInt;

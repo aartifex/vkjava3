@@ -1,4 +1,4 @@
-package org.artifex.vulkan.compute;
+package org.artifex.vulkan.descriptors;
 
 public class Descriptor
 {

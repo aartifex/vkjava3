@@ -3,6 +3,7 @@ package org.artifex.vulkan.compute;
 import org.artifex.util.DebugUtil;
 import org.artifex.vulkan.Device;
 import org.artifex.vulkan.ShaderModule;
+import org.artifex.vulkan.descriptors.DescriptorSet;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
@@ -14,7 +15,7 @@ public class Compute
 {
 
 
-    public Compute(Device device,DescriptorSet set,ShaderModule shaderModule){
+    public Compute(Device device, DescriptorSet set, ShaderModule shaderModule){
         this.computeShader=shaderModule;
         this.device=device;
 
@@ -30,7 +31,7 @@ public class Compute
 
             VkPipelineLayoutCreateInfo layoutCreateInfo = VkPipelineLayoutCreateInfo.callocStack(stack)
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                    .pSetLayouts(stack.longs(set.getDescriptorLayout()))
+                    .pSetLayouts(stack.longs(set.getLayout()))
                     .flags(0);
 
             LongBuffer pLayout = stack.mallocLong(1);
