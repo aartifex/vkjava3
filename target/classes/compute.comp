@@ -3,7 +3,7 @@
 layout (local_size_x=1) in;
 
 layout(std140,set=0,binding=0) buffer  inDat{
-    vec3 data[];
+    vec4 data[];
 } inInt;
 
 //layout(set=0,binding=1) buffer outDat{
@@ -13,11 +13,11 @@ layout(std140,set=0,binding=0) buffer  inDat{
 void main(){
     uint glID = gl_GlobalInvocationID.x;
         if(glID <= 1){
-
+            vec3 tmp = vec3(2,0,2);
 
         for(int i=1;i<100;i++){
-
-           inInt.data[i]= vec3(1,2,3);
+            vec3 res = cross(inInt.data[i].xyz,tmp);
+           inInt.data[i]= vec4(res,1);
         }
 
 
