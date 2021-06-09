@@ -1,18 +1,17 @@
 package org.artifex;
 
 import org.artifex.math.Matrix3fBuffer;
-import org.artifex.math.Vector4fBuffer;
 import org.artifex.props.AppProperties;
+import org.artifex.threading.synch.Fence;
+import org.artifex.threading.synch.Semaphore;
 import org.artifex.util.SPIRV;
 import org.artifex.vulkan.*;
 import org.artifex.vulkan.compute.Compute;
 import org.artifex.vulkan.descriptors.*;
 import org.joml.Matrix3f;
-import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;

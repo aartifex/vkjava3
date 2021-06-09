@@ -2,6 +2,7 @@ package org.artifex.vulkan;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.artifex.threading.synch.Fence;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkQueue;

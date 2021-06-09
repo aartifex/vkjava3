@@ -1,5 +1,6 @@
-package org.artifex.vulkan;
+package org.artifex.threading.synch;
 
+import org.artifex.vulkan.Device;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkFenceCreateInfo;
 
