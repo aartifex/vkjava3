@@ -2,15 +2,14 @@ package org.artifex.threading.synch;
 
 import org.artifex.threading.VkEventCreateFlagBits;
 import org.artifex.util.DebugUtil;
+import org.artifex.vulkan.CommandBuffer;
 import org.artifex.vulkan.Device;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkEventCreateInfo;
 
 import java.nio.LongBuffer;
 
-import static org.lwjgl.vulkan.VK10.VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
-import static org.lwjgl.vulkan.VK10.vkCreateEvent;
-import static org.lwjgl.vulkan.VK10.vkDestroyEvent;
+import static org.lwjgl.vulkan.VK10.*;
 
 /**
  * Used to synchronize work within a command buffer or sequence of command buffers submitted to one queue.
@@ -33,8 +32,11 @@ public class Event
                     ,"Could not create event!"
             );
         }
+    }
 
 
+    public void setEvent(CommandBuffer buffer, int stageMask){
+        vkCmdSetEvent(buffer.getCommandBuffer(),event,stageMask);
     }
 
 
