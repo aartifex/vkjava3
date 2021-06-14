@@ -3,6 +3,7 @@ package org.artifex.vulkan;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.artifex.vulkan.queues.QueueFamily;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -33,9 +34,15 @@ public class PhysicalDevice
             IntBuffer count2 = stack.callocInt(1);
 
             vkGetPhysicalDeviceQueueFamilyProperties(device,count,null);
-            /*VkQueueFamilyProperties.Buffer*/ pQueueFamilyProps = VkQueueFamilyProperties.calloc(count.get(0));
+            VkQueueFamilyProperties.Buffer pQueueFamilyProps = VkQueueFamilyProperties.calloc(count.get(0));
 
             vkGetPhysicalDeviceQueueFamilyProperties(device,count,pQueueFamilyProps);
+            queueFamilies = new ArrayList<>(pQueueFamilyProps.capacity());
+            final int[] i={0};
+            pQueueFamilyProps.forEach((p)->{
+                queueFamilies.add(new QueueFamily(p,i[0]++));
+            });
+
 
             vkCheck(vkEnumerateDeviceExtensionProperties(device,(String)null,count2,null),
                     "Failed to get device extensions");
@@ -113,17 +120,15 @@ public class PhysicalDevice
         return properties.deviceNameString();
     }
     public boolean hasGraphicsQueueFamily(){
-        for(int i=0;i<pQueueFamilyProps.capacity();i++){
-            if((pQueueFamilyProps.get(i).queueFlags() & VK_QUEUE_GRAPHICS_BIT)
-                    == VK_QUEUE_GRAPHICS_BIT) return true;
+        for (QueueFamily queueFamily : queueFamilies) {
+            if(queueFamily.supportsGraphics()) return true;
         }
         return false;
     }
 
     public boolean hasComputeQueueFamily(){
-        for (int i = 0; i < pQueueFamilyProps.capacity(); i++) {
-            if((pQueueFamilyProps.get(i).queueFlags() & VK_QUEUE_COMPUTE_BIT)
-                    == VK_QUEUE_COMPUTE_BIT) return true;
+        for (QueueFamily queueFamily : queueFamilies) {
+            if(queueFamily.supportsCompute()) return true;
         }
         return false;
     }
@@ -140,7 +145,9 @@ public class PhysicalDevice
         if(LOGGER.isDebugEnabled()){
             LOGGER.debug("Destroying physical device ");
         }
-        pQueueFamilyProps.free();
+        for (QueueFamily queueFamily : queueFamilies) {
+            queueFamily.cleanup();
+        }
         pExtensionProperties.free();
         properties.free();
         features.free();
@@ -157,8 +164,12 @@ public class PhysicalDevice
         return pExtensionProperties;
     }
 
-    public VkQueueFamilyProperties.Buffer getpQueueFamilyProps() {
-        return pQueueFamilyProps;
+//    public VkQueueFamilyProperties.Buffer getpQueueFamilyProps() {
+//        return pQueueFamilyProps;
+//    }
+
+    public List<QueueFamily> getQueueFamilies() {
+        return queueFamilies;
     }
 
     public VkPhysicalDevice getDevice() {
@@ -173,7 +184,7 @@ public class PhysicalDevice
     private VkPhysicalDevice device;
     private VkPhysicalDeviceFeatures features;
     private VkPhysicalDeviceProperties properties;
-    private VkQueueFamilyProperties.Buffer pQueueFamilyProps;
+    private List<QueueFamily> queueFamilies;
     private VkExtensionProperties.Buffer pExtensionProperties;
     private VkPhysicalDeviceMemoryProperties memoryProperties;
 

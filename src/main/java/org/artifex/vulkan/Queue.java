@@ -3,6 +3,7 @@ package org.artifex.vulkan;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.artifex.threading.synch.Fence;
+import org.artifex.vulkan.queues.QueueFamily;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkQueue;
@@ -11,6 +12,7 @@ import org.lwjgl.vulkan.VkSubmitInfo;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.List;
 
 import static org.artifex.util.DebugUtil.vkCheck;
 import static org.lwjgl.vulkan.VK10.*;
@@ -79,15 +81,12 @@ public class Queue
         private static int getGraphicsQueueFamilyIndex(Device device){
             int index = -1;
             PhysicalDevice physicalDevice = device.getPhysicalDevice();
-            VkQueueFamilyProperties.Buffer buffer=physicalDevice.getpQueueFamilyProps();
-            int numQueuefamilies = buffer.capacity();
+            List<QueueFamily> queueFamilies = device.getPhysicalDevice().getQueueFamilies();
+            int numQueuefamilies = queueFamilies.size();
             for (int i = 0; i <numQueuefamilies ; i++) {
-                VkQueueFamilyProperties props = buffer.get(i);
-                System.out.println(props.queueCount() + " ,,, " + i);
-                if((props.queueFlags()& VK_QUEUE_GRAPHICS_BIT)==1)
-                {
-                    index=i;break;
-                }
+                QueueFamily props = queueFamilies.get(i);
+                if(props.supportsGraphics()){
+                    index=i;break;}
             }
             if(index<0) throw  new RuntimeException("Failed to get graphics queue");
 
@@ -128,16 +127,12 @@ public class Queue
 
         private static int getComputeQueueFamilyIndex(Device device){
             int index = -1;
-            PhysicalDevice physicalDevice = device.getPhysicalDevice();
-            VkQueueFamilyProperties.Buffer buffer=physicalDevice.getpQueueFamilyProps();
-            int numQueuefamilies = buffer.capacity();
+            List<QueueFamily> queueFamilies = device.getPhysicalDevice().getQueueFamilies();
+            int numQueuefamilies = queueFamilies.size();
             for (int i = 0; i <numQueuefamilies ; i++) {
-                VkQueueFamilyProperties props = buffer.get(i);
-                System.out.println(props.queueCount() + " ,,, " + i);
-                if((props.queueFlags()& VK_QUEUE_COMPUTE_BIT)==VK_QUEUE_COMPUTE_BIT)
-                {
-                    index=i;break;
-                }
+                QueueFamily props = queueFamilies.get(i);
+                if(props.supportsCompute() && props.remaining()>0){
+                    index=i;break;}
             }
             if(index<0) throw  new RuntimeException("Failed to get graphics queue");
 
