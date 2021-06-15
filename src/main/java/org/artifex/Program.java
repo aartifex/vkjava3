@@ -6,7 +6,7 @@ import org.artifex.threading.synch.Fence;
 import org.artifex.threading.synch.Semaphore;
 import org.artifex.util.SPIRV;
 import org.artifex.vulkan.*;
-import org.artifex.vulkan.compute.Compute;
+import org.artifex.vulkan.compute.ComputePipeline;
 import org.artifex.vulkan.descriptors.*;
 import org.joml.Matrix3f;
 import org.lwjgl.system.MemoryStack;
@@ -57,7 +57,7 @@ public class Program
 
         //submit
 
-        Compute compute = new Compute(device,set,
+        ComputePipeline compute = new ComputePipeline(device,set,
                 new ShaderModule(VK_SHADER_STAGE_COMPUTE_BIT,device,SPIRV.compileShaderFile("compute.comp", SPIRV.ShaderType.COMPUTE_SHADER)));
         fence = new Fence(device,false);
 
@@ -110,12 +110,12 @@ public class Program
 
     }
 
-    public void record(DescriptorSet set, DescriptorBindings bindings, Compute compute){
+    public void record(DescriptorSet set, DescriptorBindings bindings, ComputePipeline compute){
 
         try(MemoryStack stack= MemoryStack.stackPush()){
         commandBuffer.beginRecording();
         vkCmdBindPipeline(commandBuffer.getCommandBuffer(),VK_PIPELINE_BIND_POINT_COMPUTE,
-                compute.getComputePipeline());
+                compute.getPipeline());
 
         vkCmdBindDescriptorSets(commandBuffer.getCommandBuffer(),VK_PIPELINE_BIND_POINT_COMPUTE,compute.getPipelineLayout(),
                 0,stack.longs(set.getSetHandle()),null

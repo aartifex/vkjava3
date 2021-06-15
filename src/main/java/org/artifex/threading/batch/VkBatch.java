@@ -42,22 +42,23 @@ public abstract class VkBatch implements Runnable
         commandPool = new CommandPool(device,queue.getFamilyIndex());
     }
 
-    protected CommandBuffer createPrimaryCommandBuffer(boolean oneTimeSubmit){
+    protected final CommandBuffer createPrimaryCommandBuffer(boolean oneTimeSubmit){
         if(primaryBuffer!=null)primaryBuffer.cleanup();
         return primaryBuffer = new CommandBuffer(commandPool,true,oneTimeSubmit);
     }
 
-    protected CommandBuffer newCmdBuffer(boolean oneTimeSubmit){
+    protected final CommandBuffer newCmdBuffer(boolean oneTimeSubmit){
         return new CommandBuffer(commandPool,false,oneTimeSubmit);
     }
 
-    protected ShaderModule createShaderModuleGLSL(File glslFile, SPIRV.ShaderType shaderType){
+    protected final ShaderModule createShaderModuleGLSL(File glslFile, SPIRV.ShaderType shaderType){
         String absolute = glslFile.getAbsolutePath();
         SPIRV spirv = SPIRV.compileShaderAbsoluteFile(absolute,shaderType);
         Objects.requireNonNull(spirv,"Could not compile shader file " +glslFile.getName());
         return new ShaderModule(shaderType.type,device,spirv);
-
     }
+
+
 
 
     protected  Queue queue;

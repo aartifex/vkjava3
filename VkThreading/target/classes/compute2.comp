@@ -1,0 +1,27 @@
+#version 450 core
+
+layout (local_size_x=1) in;
+
+
+layout(set=0,binding=0) buffer  inDat{
+   int[] dat;
+} inInt;
+
+
+layout(set=0,binding=1) readonly buffer  odat{
+   int[] dat;
+} o;
+
+
+
+
+void main(){
+    uint glIDx = gl_GlobalInvocationID.x;
+
+    if(glIDx<1){
+        for(int i=0;i<20000;i++){
+            inInt.dat[i]=o.dat[i];
+        }
+
+    }
+}

@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="VkThreading" />
         <module name="vkJava3" />
-        <module name="vkjava3" />
       </profile>
     </annotationProcessing>
   </component>
